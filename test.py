@@ -83,7 +83,9 @@ class NotebookHuman:
         self.driver.find_element_by_id('kernel-python3').click()
 
         print("clicked new buttons")
+        print("title is ", self.driver.title)
         self.driver.switch_to_window(self.driver.window_handles[-1])
+        print("title after switching is ", self.driver.title)
         self.wait_for_ready_kernel()
         print("kernel is ready")
 
@@ -142,4 +144,3 @@ if __name__ == '__main__':
 
     finally:
         nbh.logout()
-        nbh.driver.close()
