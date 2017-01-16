@@ -54,6 +54,10 @@ class NotebookHuman:
         )
         print("Found new-buttons")
 
+    def logout(self):
+        self.driver.find_element_by_id('logout').click()
+        time.sleep(1)
+
     def wait_for_ready_kernel(self):
         """
         Waits until the kernel is ready to accept more code
@@ -119,18 +123,23 @@ if __name__ == '__main__':
             selenium_url,
             desired_capabilities=DesiredCapabilities.CHROME),
         hub_url, username, password)
-    print("attempting to log in to jupyterhub")
-    nbh.login_to_jupyterhub()
-    print("logged into jupyterhub")
-    nbh.create_new_notebook()
-    print("created new notebook")
+    try:
+        print("attempting to log in to jupyterhub")
+        nbh.login_to_jupyterhub()
+        print("logged into jupyterhub")
+        nbh.create_new_notebook()
+        print("created new notebook")
 
-    nb = nbformat.read(open('test.ipynb'), 4)
-    for cell in nb.cells:
-        if cell.cell_type == 'code' and cell.execution_count:
-            print("attempting to run some code")
-            nbh.run_new_code_cell(cell.source)
-            real_output = nbh.get_last_output().strip()
-            print(cell.source)
-            print(real_output)
-            assert real_output == cell.outputs[0].text.strip()
+        nb = nbformat.read(open('test.ipynb'), 4)
+        for cell in nb.cells:
+            if cell.cell_type == 'code' and cell.execution_count:
+                print("attempting to run some code")
+                nbh.run_new_code_cell(cell.source)
+                real_output = nbh.get_last_output().strip()
+                print(cell.source)
+                print(real_output)
+                assert real_output == cell.outputs[0].text.strip()
+
+    finally:
+        nbh.logout()
+        nbh.driver.close()
