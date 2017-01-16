@@ -16,7 +16,7 @@ class NotebookHuman:
     """
     A fake Notebook User who can simulate human-ish activity
     """
-    def __init__(self, driver, hub_url, username, password, timeout=45):
+    def __init__(self, driver, hub_url, username, password, timeout=60):
         self.driver = driver
         self.hub_url = hub_url
         self.username = username
