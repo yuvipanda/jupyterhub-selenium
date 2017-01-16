@@ -2,20 +2,21 @@ import os
 import hmac
 import hashlib
 import time
+import socket
 
-from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.remote import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 import nbformat
 
-
 class NotebookHuman:
     """
     A fake Notebook User who can simulate human-ish activity
     """
-    def __init__(self, driver, hub_url, username, password, timeout=30):
+    def __init__(self, driver, hub_url, username, password, timeout=45):
         self.driver = driver
         self.hub_url = hub_url
         self.username = username
@@ -98,13 +99,18 @@ class NotebookHuman:
 if __name__ == '__main__':
     secret = os.environ['HMAC_SECRET_KEY']
     hub_url = os.environ['HUB_URL']
-    username = 'test42'
+    selenium_url = os.environ['SELENIUM_URL']
+    username = socket.gethostname()
     password = hmac.new(
         bytes.fromhex(secret),
         username.encode('utf-8'),
         hashlib.sha512
     ).hexdigest()
-    nbh = NotebookHuman(webdriver.Chrome(), hub_url, username, password)
+    nbh = NotebookHuman(
+        webdriver.WebDriver(
+            selenium_url,
+            desired_capabilities=DesiredCapabilities.CHROME),
+        hub_url, username, password)
     nbh.login_to_jupyterhub()
     nbh.create_new_notebook()
 
