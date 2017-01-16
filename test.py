@@ -34,20 +34,25 @@ class NotebookHuman:
         self.driver.find_element_by_name("username").send_keys(self.username)
         self.driver.find_element_by_name("password").send_keys(self.password)
         self.driver.find_element_by_id('login_submit').click()
+
+        print("Submitted log in info")
         try:
             WebDriverWait(self.driver, self.timeout).until(
                 EC.visibility_of_element_located((By.ID, 'start'))
             )
             self.driver.find_element_by_id('start').click()
+            print("Found start button and clicked it")
         except TimeoutException:
             # Is ok, probably just means this user's pod was already running
             # and just sent us straight to the home. We verify this after the
             # pass
+            print("Could not find start button in time")
             pass
 
         WebDriverWait(self.driver, self.timeout).until(
             EC.visibility_of_element_located((By.ID, 'new-buttons'))
         )
+        print("Found new-buttons")
 
     def wait_for_ready_kernel(self):
         """
@@ -69,11 +74,14 @@ class NotebookHuman:
         WebDriverWait(self.driver, self.timeout).until(
             EC.visibility_of_element_located((By.ID, 'new-buttons'))
         )
+        print("found new buttons")
         self.driver.find_element_by_id('new-buttons').click()
         self.driver.find_element_by_id('kernel-python3').click()
 
+        print("clicked new buttons")
         self.driver.switch_to_window(self.driver.window_handles[-1])
         self.wait_for_ready_kernel()
+        print("kernel is ready")
 
     def run_new_code_cell(self, code):
         """
@@ -111,13 +119,18 @@ if __name__ == '__main__':
             selenium_url,
             desired_capabilities=DesiredCapabilities.CHROME),
         hub_url, username, password)
+    print("attempting to log in to jupyterhub")
     nbh.login_to_jupyterhub()
+    print("logged into jupyterhub")
     nbh.create_new_notebook()
+    print("created new notebook")
 
     nb = nbformat.read(open('test.ipynb'), 4)
     for cell in nb.cells:
         if cell.cell_type == 'code' and cell.execution_count:
+            print("attempting to run some code")
             nbh.run_new_code_cell(cell.source)
             real_output = nbh.get_last_output().strip()
+            print(cell.source)
             print(real_output)
             assert real_output == cell.outputs[0].text.strip()
